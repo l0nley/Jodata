@@ -1,0 +1,8 @@
+c:\users\uladzimir_harabtsou\documents\visual studio 2012\Projects\Jodata\Jodata\bin\Debug\Jodata.exe.config
+c:\users\uladzimir_harabtsou\documents\visual studio 2012\Projects\Jodata\Jodata\bin\Debug\Jodata.exe
+c:\users\uladzimir_harabtsou\documents\visual studio 2012\Projects\Jodata\Jodata\bin\Debug\Jodata.pdb
+c:\users\uladzimir_harabtsou\documents\visual studio 2012\Projects\Jodata\Jodata\obj\Debug\Jodata.csprojResolveAssemblyReference.cache
+c:\users\uladzimir_harabtsou\documents\visual studio 2012\Projects\Jodata\Jodata\obj\Debug\Jodata.exe
+c:\users\uladzimir_harabtsou\documents\visual studio 2012\Projects\Jodata\Jodata\obj\Debug\Jodata.pdb
+c:\users\uladzimir_harabtsou\documents\visual studio 2012\Projects\Jodata\Jodata\bin\Debug\Newtonsoft.Json.dll
+c:\users\uladzimir_harabtsou\documents\visual studio 2012\Projects\Jodata\Jodata\bin\Debug\Newtonsoft.Json.xml
