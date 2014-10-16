@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq.Expressions;
-using System.Runtime.CompilerServices;
 using Jodata.JiraEntities;
 
 namespace Jodata.Translator
@@ -41,19 +40,77 @@ namespace Jodata.Translator
           return ParseMember((MemberExpression) node, typeContext);
         case ExpressionType.Constant:
           return ParseConstant((ConstantExpression) node, typeContext);
+        case ExpressionType.Conditional:
+          return ParseConditional((ConditionalExpression) node, typeContext);
+        case ExpressionType.And:
+        case ExpressionType.AndAlso:
+          return ParseAnd((BinaryExpression) node, typeContext);
       }
 
       return string.Empty;
     }
 
+    private static string ParseAnd(BinaryExpression node, string typeContext = "")
+    {
+      var nodeLeft = ParseNode(node.Left, typeContext);
+      var nodeRigt = ParseNode(node.Right, typeContext);
+      var nodeLeftEmpty = string.IsNullOrEmpty(nodeLeft);
+      var nodeRightEmpty = string.IsNullOrEmpty(nodeRigt);
+      if (nodeLeftEmpty && nodeRightEmpty == false)
+      {
+        return nodeRigt;
+      }
+
+      if (nodeRightEmpty && nodeLeftEmpty == false)
+      {
+        return nodeLeft;
+      }
+
+      if (nodeLeftEmpty)
+      {
+        return string.Empty;
+      }
+
+      return "(" + nodeLeft + ") AND (" + nodeRigt + ")";
+    }
+
+    private static string ParseConditional(ConditionalExpression node, string typeContext = "")
+    {
+      var iftrue = ParseNode(node.IfTrue);
+      var iffalse = ParseNode(node.IfFalse);
+      // NOTE Specific
+      return iftrue == string.Empty ? iffalse : iftrue;
+    }
+
     private static string ParseConstant(ConstantExpression node, string typeContext = "")
     {
+      if (node.Value == null)
+      {
+        // NOTE Special null parsing;
+        return string.Empty;
+      }
       return typeContext + string.Format("\"{0}\"", node.Value);
     }
 
     private static string ParseMember(MemberExpression node, string typeContext = "")
     {
-      return typeContext+node.Member.Name;
+      if (node.Member.Name == "LabelsRaw")
+      {
+        // NOTE Special handling;
+        return "labels";
+      }
+
+      if (node.Expression.NodeType == ExpressionType.Parameter)
+      {
+        return typeContext + node.Member.Name;
+      }
+
+      if (node.Expression.Type == typeof (IssueType))
+      {
+        return "type";
+      }
+
+      return "UNKNOWN";
     }
 
     private static string ParseEqual(BinaryExpression node, string typeContext = "")
@@ -99,6 +156,10 @@ namespace Jodata.Translator
       switch (expression.Method.Name)
       {
         case "Where":
+          // first expression for where is param, witch is typeContext
+          // second is Quote
+          return "(" + ParseNode(expression.Arguments[1], typeContext) + ")";
+        case "Select":
           // first expression for where is param, witch is typeContext
           // second is Quote
           return "(" + ParseNode(expression.Arguments[1], typeContext) + ")";

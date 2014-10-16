@@ -12,7 +12,7 @@ namespace Jodata.JiraEntities
     static JiraHelper()
     {
       Username = "Uladzimir_Harabtsou";
-      Password = "MHd79zq3tu";
+      Password = "";
       BaseUrl = "https://jira.epam.com/jira/rest/api/latest/";
     }
 
@@ -74,7 +74,7 @@ namespace Jodata.JiraEntities
       int startAt = 0,
       int maxResult = 50)
     {
-      fields = fields ?? new List<string> { "summary", "status", "assignee", "labels" };
+      fields = fields ?? new List<string> { "summary", "status", "assignee", "labels", "issuelinks", "issuetype" };
 
       var request = new SearchRequest
       {

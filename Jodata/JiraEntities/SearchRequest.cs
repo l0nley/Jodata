@@ -11,6 +11,7 @@ namespace Jodata.JiraEntities
     public SearchRequest()
     {
       Fields = new List<string>();
+      MaxResults = 200;
     }
 
     [JsonProperty("jql")]
