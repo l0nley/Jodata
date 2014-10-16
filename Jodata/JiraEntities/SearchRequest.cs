@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace Jodata
+namespace Jodata.JiraEntities
 {
   /// <summary>
   /// A class representing a JIRA REST search request

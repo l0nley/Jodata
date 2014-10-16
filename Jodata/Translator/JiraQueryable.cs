@@ -4,26 +4,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 
-namespace Jodata
+namespace Jodata.Translator
 {
-  public class JiraQuery<T> : BaseEntity, IQueryable<T>
+  public class JiraQueryable<T> : IQueryable<T>
   {
-    public JiraQuery(IQueryProvider provider, Expression expression, string argument = null, string data = null)
+    public JiraQueryable(IQueryProvider provider, Expression expression, string argument = null, string data = null)
     {
       Provider = provider;
       Expression = expression;
       Argument = argument;
       Data = data;
-    }
-
-    public IEnumerator<T> GetEnumerator()
-    {
-      return Provider.Execute<IEnumerable<T>>(Expression).GetEnumerator();
-    }
-
-    IEnumerator IEnumerable.GetEnumerator()
-    {
-      return GetEnumerator();
     }
 
     public Expression Expression { get; private set; }
@@ -36,7 +26,15 @@ namespace Jodata
     }
 
     public IQueryProvider Provider { get; private set; }
+
+    public IEnumerator<T> GetEnumerator()
+    {
+      return Provider.Execute<IEnumerable<T>>(Expression).GetEnumerator();
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+      return GetEnumerator();
+    }
   }
-
-
 }

@@ -1,34 +1,26 @@
-﻿using System;
-using System.Data.Services;
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text;
 using Newtonsoft.Json;
 
-namespace Jodata
+namespace Jodata.JiraEntities
 {
-  [IgnoreProperties("Username", "Password", "BaseUrl")]
-  public class BaseEntity
+  public static class JiraHelper
   {
-    public BaseEntity()
+    static JiraHelper()
     {
       Username = "Uladzimir_Harabtsou";
-      Password = "";
+      Password = "MHd79zq3tu";
       BaseUrl = "https://jira.epam.com/jira/rest/api/latest/";
     }
 
-    [JsonProperty("self")]
-    public string Self { get; set; }
+    public static string Username { get; private set; }
+    public static string Password { get; private set; }
+    public static string BaseUrl { get; private set; }
 
-    [JsonIgnore]
-    public string Username { get; private set; }
-    [JsonIgnore]
-    public string Password { get; private set; }
-    [JsonIgnore]
-    public string BaseUrl { get; private set; }
-
-
-    protected string RunQuery(
+    public static string RunQuery(
       string resource = null,
       string argument = null,
       string data = null,
@@ -76,13 +68,35 @@ namespace Jodata
       return result;
     }
 
-    private string GetEncodedCredentials()
+    public static List<Issue> GetIssues(
+      string jql,
+      List<string> fields = null,
+      int startAt = 0,
+      int maxResult = 50)
+    {
+      fields = fields ?? new List<string> { "summary", "status", "assignee", "labels" };
+
+      var request = new SearchRequest
+      {
+        Fields = fields,
+        JQL = jql,
+        MaxResults = maxResult,
+        StartAt = startAt
+      };
+
+      var data = JsonConvert.SerializeObject(request);
+      var result = RunQuery("search", data: data, method: "POST");
+
+      var response = JsonConvert.DeserializeObject<SearchResponse>(result);
+
+      return response.IssueDescriptions;
+    }
+
+    private static string GetEncodedCredentials()
     {
       var mergedCredentials = string.Format("{0}:{1}", Username, Password);
       var byteCredentials = Encoding.UTF8.GetBytes(mergedCredentials);
       return Convert.ToBase64String(byteCredentials);
     }
   }
-
-  
 }

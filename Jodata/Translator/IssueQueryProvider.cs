@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Linq.Expressions;
 
-namespace Jodata
+namespace Jodata.Translator
 {
   public class JiraQueryProvider : IQueryProvider
   {
@@ -11,7 +11,7 @@ namespace Jodata
       var elementType = TypeSystem.GetElementType(expression.Type);
       try
       {
-        return (IQueryable) Activator.CreateInstance(typeof(JiraQuery<>).MakeGenericType(elementType), new object[] { this, expression });
+        return (IQueryable)Activator.CreateInstance(typeof(JiraQueryable<>).MakeGenericType(elementType), new object[] { this, expression });
       }
       catch (System.Reflection.TargetInvocationException tie)
       {
@@ -21,7 +21,7 @@ namespace Jodata
 
     public IQueryable<TResult> CreateQuery<TResult>(Expression expression)
     {
-      return new JiraQuery<TResult>(this, expression);
+      return new JiraQueryable<TResult>(this, expression);
     }
 
     public object Execute(Expression expression)
@@ -37,8 +37,4 @@ namespace Jodata
       return (TResult)QueryContext.Execute(expression, isEnumerable);
     }
   }
-}
-
-
-
 }

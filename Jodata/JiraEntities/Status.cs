@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace Jodata
+namespace Jodata.JiraEntities
 {
   /// <summary>
   /// Represents a Status JSON object
