@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Jodata.JiraEntities
 {
@@ -11,7 +13,7 @@ namespace Jodata.JiraEntities
   {
     static JiraHelper()
     {
-      Username = "Uladzimir_Harabtsou";
+      Username = "";
       Password = "";
       BaseUrl = "https://jira.epam.com/jira/rest/api/latest/";
     }
@@ -74,7 +76,7 @@ namespace Jodata.JiraEntities
       int startAt = 0,
       int maxResult = 50)
     {
-      fields = fields ?? new List<string> { "summary", "status", "assignee", "labels", "issuelinks", "issuetype" };
+      fields = fields ?? new List<string> { "summary", "status", "assignee", "labels", "issuelinks", "parent", "issuetype", "created", "updated", "resolutiondate", "changelog" };
 
       var request = new SearchRequest
       {
@@ -90,6 +92,36 @@ namespace Jodata.JiraEntities
       var response = JsonConvert.DeserializeObject<SearchResponse>(result);
 
       return response.IssueDescriptions;
+    }
+
+    public static Dictionary<string, object> GetIssueFieldValues(string issueId)
+    {
+      var request = (HttpWebRequest) WebRequest.Create("https://jira.epam.com/jira/rest/api/latest/issue/" + issueId);
+      request.ContentType = "application/json";
+      request.Method = "GET";
+
+      var base64Credentials = GetEncodedCredentials();
+      request.Headers.Add("Authorization", "Basic " + base64Credentials);
+
+      using (var response = (HttpWebResponse)request.GetResponse())
+      {
+        using (var stream = response.GetResponseStream())
+        {
+          if (stream == null)
+          {
+            throw new HttpListenerException(502, "Gateway timeout");
+          }
+
+          using (var reader = new StreamReader(stream))
+          {
+            var result = reader.ReadToEnd();
+            var obj = JObject.Parse(result);
+            var fields = (JObject) obj["fields"];
+            var props = fields.Properties();
+           return props.ToDictionary(l => l.Name, l => fields[l.Name].Value<object>());
+          }
+        }
+      }
     }
 
     private static string GetEncodedCredentials()

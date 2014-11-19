@@ -6,5 +6,8 @@ namespace Jodata.JiraEntities
   {
     [JsonProperty("self")]
     public string Self { get; set; }
+
+   [JsonProperty("key")]
+    public string Key { get; set; }
   }
 }

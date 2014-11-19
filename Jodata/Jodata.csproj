@@ -52,6 +52,9 @@
     <Compile Include="JiraEntities\Issue.cs" />
     <Compile Include="JiraEntities\IssueKey.cs" />
     <Compile Include="JiraEntities\JiraHelper.cs" />
+    <Compile Include="JiraEntities\UpdateAuthor.cs" />
+    <Compile Include="JiraEntities\Worklog.cs" />
+    <Compile Include="JiraEntities\WorklogEntries.cs" />
     <Compile Include="Translator\IssueQueryProvider.cs" />
     <Compile Include="JiraAccessService.cs" />
     <Compile Include="ServiceEntities.cs" />

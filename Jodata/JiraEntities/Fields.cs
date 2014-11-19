@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Reflection.Emit;
+﻿using System;
+using System.Collections.Generic;
 using Newtonsoft.Json;
 
 namespace Jodata.JiraEntities
@@ -21,8 +21,23 @@ namespace Jodata.JiraEntities
     [JsonProperty("timetracking")]
     public string TimeTracking { get; set; }
 
+    [JsonProperty("created")]
+    public DateTime Created { get; set; }
+
+    [JsonProperty("updated")]
+    public DateTime Updated { get; set; }
+
+    [JsonProperty("resolutiondate")]
+    public DateTime? Resolved { get; set; }
+
     [JsonProperty("labels")]
     public IList<string> Labels { get; set; }
+
+    [JsonProperty("worklog")]
+    public WorklogEntries Worklog { get; set; }
+
+    [JsonProperty("parent", NullValueHandling = NullValueHandling.Ignore)]
+    public BaseEntity Parent { get; set; }
 
     [JsonIgnore]
     public string LabelsRaw

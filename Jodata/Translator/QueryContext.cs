@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using Jodata.JiraEntities;
 
@@ -14,8 +16,32 @@ namespace Jodata.Translator
         expression = expression.Reduce();
       }
 
-      var jql = ParseNode(expression);
-
+      var expressionString = expression.ToString();
+      string jql;
+      if (expressionString.Contains("WorklogQuery"))
+      {
+        var query = ParseNode(expression, string.Empty);
+        var wkl = query.Split('\"').Skip(1).Take(1).First();
+        var @params = wkl.Split(';').ToList();
+        var dateStart = @params[0];
+        var dateEnd = @params[1];
+        var userName = @params[2];
+        jql = string.Format("key in workedIssues(\"{0}\",\"{1}\",\"{2}\")", dateStart, dateEnd, userName);
+        return JiraHelper.GetIssues(
+          jql,
+          new List<string>
+          {
+            "worklog",
+            "issuetype",
+            "parent",
+             "assignee", 
+             "labels", 
+             "issuelinks",
+             "summary",
+          });
+      }
+      
+      jql = ParseNode(expression);
       return ParseAndExecute(jql);
     }
 
@@ -45,9 +71,50 @@ namespace Jodata.Translator
         case ExpressionType.And:
         case ExpressionType.AndAlso:
           return ParseAnd((BinaryExpression) node, typeContext);
+        case ExpressionType.Or:
+        case ExpressionType.OrElse:
+          return ParseOr((BinaryExpression) node, typeContext);
+        case ExpressionType.Convert:
+          return ParseConvert((UnaryExpression) node, typeContext);
+
       }
 
       return string.Empty;
+    }
+
+    private static string ParseConvert(UnaryExpression node, string typeContext)
+    {
+      if (node.Operand.Type == typeof (DateTime))
+      {
+        var date = (DateTime)((ConstantExpression) node.Operand).Value;
+        return "\"" + date.ToString("yyyy/MM/dd HH:mm") + "\"";
+      }
+
+      return string.Empty;
+    }
+
+    private static string ParseOr(BinaryExpression node, string typeContext)
+    {
+      var nodeLeft = ParseNode(node.Left, typeContext);
+      var nodeRigt = ParseNode(node.Right, typeContext);
+      var nodeLeftEmpty = string.IsNullOrEmpty(nodeLeft);
+      var nodeRightEmpty = string.IsNullOrEmpty(nodeRigt);
+      if (nodeLeftEmpty && nodeRightEmpty == false)
+      {
+        return nodeRigt;
+      }
+
+      if (nodeRightEmpty && nodeLeftEmpty == false)
+      {
+        return nodeLeft;
+      }
+
+      if (nodeLeftEmpty)
+      {
+        return string.Empty;
+      }
+
+      return "((" + nodeLeft + ") OR (" + nodeRigt + "))";
     }
 
     private static string ParseAnd(BinaryExpression node, string typeContext = "")
@@ -108,6 +175,26 @@ namespace Jodata.Translator
       if (node.Expression.Type == typeof (IssueType))
       {
         return "type";
+      }
+
+      if (node.Expression.Type == typeof(Assignee) && node.Member.Name == "Name")
+      {
+        return "assignee";
+      }
+
+      if (node.Expression.Type == typeof (Status))
+      {
+        return "status";
+      }
+
+      if (node.Member.Name == "Resolved")
+      {
+        return "resolved";
+      }
+
+      if (node.Member.Name == "Progress")
+      {
+        return "cf[20500]";
       }
 
       return "UNKNOWN";
